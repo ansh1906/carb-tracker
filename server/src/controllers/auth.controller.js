@@ -82,10 +82,8 @@ async function loginUser(req, res) {
         });
 
         return res.status(200).json({
-            id: user._id,
             name: user.name,
             email: user.email,
-            accessToken: token
         });
     } catch (err) {
         console.error('LOGIN ERROR:', err);
@@ -116,6 +114,12 @@ async function logoutUser(req, res) {
     }
 }
 
+const getCurrentUser = async (req, res) => {
+    res.status(200).json({
+        success: true,
+        user: req.user
+    });
+};
 module.exports = {
-    registerUser,loginUser,logoutUser
+    registerUser,loginUser,logoutUser,getCurrentUser
 };

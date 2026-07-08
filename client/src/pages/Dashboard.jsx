@@ -1,12 +1,10 @@
 import React from 'react'
 
 function Dashboard() {
+    const [meal, setMeal] = React.useState('');
     return (
-        <div>
-            <h1>Dashboard</h1>
-            <p>Welcome to your dashboard!</p>
-        </div>
+        <h1>HI</h1>
     )
 }
 
-export default Dashboard;
+export default Dashboard
