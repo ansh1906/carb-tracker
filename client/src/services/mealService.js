@@ -1,6 +1,6 @@
 import api from './api';
 
-export const getMeals = async (description) => {
+export const createMeal = async (description) => {
   try {
     const response = await api.post('/meals',{description});
     return response.data;
@@ -8,3 +8,5 @@ export const getMeals = async (description) => {
     throw error.response?.data || error;
   }
 };
+
+
