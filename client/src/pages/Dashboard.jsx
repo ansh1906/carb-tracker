@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { createMeal } from '../services/mealService';
 import Navbar from '../components/Navbar';
 import AnalyzingLoader from '../components/AnalyzingLoader';
-import GlucoseWaveBackground from '../components/GlucoseWaveBackground';
-
+import DotGrid from '../components/test';
 function Dashboard() {
     const [description, setDescription] = useState('');
     const [result, setResult] = useState(null);
@@ -27,12 +26,23 @@ function Dashboard() {
     };
 
     return (
-        <div className="bg-[#FAFAF9] dark:bg-[#121212] min-h-screen">
-            <GlucoseWaveBackground/>
+        <div className="relative bg-[#FAFAF9] dark:bg-[#121212] min-h-screen overflow-hidden">
             <Navbar />
-
-            <div className="w-[80vw] max-w-3xl mx-auto px-6 py-12">
-                <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-xl shadow-black/5 p-8">
+            <div className="mt-17 absolute inset-0 z-0 overflow-hidden opacity-20 dark:opacity-40 pointer-events-none">
+                <DotGrid
+                    dotSize={4}
+                    gap={15}
+                    baseColor="#2F293A"
+                    activeColor="#5227FF"
+                    proximity={120}
+                    shockRadius={250}
+                    shockStrength={5}
+                    resistance={750}
+                    returnDuration={1.5}
+                />
+            </div>
+            <div className="relative z-10 w-[80vw] max-w-3xl mx-auto px-6 py-12">
+                <div className="bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-sm rounded-2xl shadow-xl shadow-black/5 p-8">
                     <h1 className="text-2xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] mb-6">
                         Log a Meal
                     </h1>

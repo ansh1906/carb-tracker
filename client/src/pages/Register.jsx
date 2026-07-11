@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../services/authService';
-import GlucoseWaveBackground from '../components/GlucoseWaveBackground';
-
+import DotGrid from '../components/test';
 function Register() {
     const navigate = useNavigate();
 
@@ -26,8 +25,19 @@ function Register() {
 
     return (
         <div className="relative min-h-screen flex items-center justify-center bg-[#FAFAF9] dark:bg-[#121212] overflow-hidden">
-
-            <GlucoseWaveBackground />
+            <div className="absolute inset-0 -z-0 overflow-hidden opacity-20">
+                <DotGrid
+                    dotSize={5}
+                    gap={15}
+                    baseColor="#2F293A"
+                    activeColor="#5227FF"
+                    proximity={120}
+                    shockRadius={250}
+                    shockStrength={5}
+                    resistance={750}
+                    returnDuration={1.5}
+                />
+            </div>
 
             <div className="relative z-10 w-full max-w-sm bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-xl shadow-black/5 p-8">
                 <h1 className="text-2xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] mb-6 text-center">
