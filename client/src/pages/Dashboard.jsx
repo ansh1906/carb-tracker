@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createMeal } from '../services/mealService';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/navbar';
 import AnalyzingLoader from '../components/AnalyzingLoader';
 import DotGrid from '../components/test';
 function Dashboard() {
@@ -22,13 +22,13 @@ function Dashboard() {
             setError(err.message || 'Failed to analyze meal.');
         } finally {
             setLoading(false);
-        }
+        } 
     };
 
-    return (
+    return ( 
         <div className="relative bg-[#FAFAF9] dark:bg-[#121212] min-h-screen overflow-hidden">
             <Navbar />
-            <div className="mt-17 absolute inset-0 z-0 overflow-hidden opacity-20 dark:opacity-40 pointer-events-none">
+            <div className="mt-17 absolute inset-0 z-0 overflow-hidden opacity-10 dark:opacity-30 pointer-events-none">
                 <DotGrid
                     dotSize={4}
                     gap={15}

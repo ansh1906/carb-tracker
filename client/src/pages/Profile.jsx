@@ -1,0 +1,106 @@
+import React, { useEffect, useState } from 'react'
+import DotGrid from '../components/test';
+import { getMe } from '../services/authService';
+import Navbar from '../components/navbar';
+
+function Profile() {
+    const [user,setUser] = useState(null);
+    const [loading,setLoading] = useState(true);
+    const [error,setError] = useState('');
+
+    useEffect(()=>{
+        const fetchUser = async ()=> {
+            try{
+                const data = await getMe();
+                console.log(data)
+                setUser(data.user);
+            }catch{
+                setError('Failed to load profile')
+            }finally{
+                setLoading(false);
+            }
+        }
+        fetchUser();
+    },[])
+    return (
+        <div className="relative min-h-screen bg-[#FAFAF9] dark:bg-[#121212] overflow-hidden">
+            <div className="mt-17 absolute inset-0 z-0 overflow-hidden opacity-20">
+                <DotGrid
+                        dotSize={5}
+                        gap={15}
+                        baseColor="#2F293A"
+                        activeColor="#5227FF"
+                        proximity={120}
+                        shockRadius={250}
+                        shockStrength={5}
+                        resistance={750}
+                        returnDuration={1.5}
+                    />
+            </div>
+            <Navbar />
+
+            <div className="w-full max-w-175 mx-auto relative z-10 px-6 py-12">
+                <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-xl shadow-black/5 p-8">
+                    {loading && (
+                        <p className="text-sm text-[#6E6E73] dark:text-[#9B9BA1] text-center">
+                            Loading profile...
+                        </p>
+                    )}
+
+                    {error && (
+                        <p className="text-sm text-red-500 text-center">{error}</p>
+                    )}
+
+                    {user && !loading && (
+                        <div className="animate-fadeIn">
+                            {/* USER PROFILE PIC AND MAIL */}
+                            <div className="w-16 h-16 rounded-full bg-[#2563EB] flex items-center justify-center mx-auto mb-4">
+                                <span className="text-2xl font-semibold text-white">
+                                    {user.name?.charAt(0).toUpperCase()}
+                                </span>
+                            </div>
+                            
+                            <h1 className="text-xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] text-center mb-1">
+                                {user.name}
+                            </h1>
+                            <p className="text-sm text-[#6E6E73] dark:text-[#9B9BA1] text-center mb-6">
+                                {user.email}
+                            </p>
+                            
+                            {/* Specific details of user */}
+                            <div className="border-t font border-gray-100 dark:border-gray-800 pt-6 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-2xl font-medium text-[#6E6E73] dark:text-[#9B9BA1]">Name</span>
+                                    <span className="text-2xl font-medium text-[#1C1C1E] dark:text-[#F5F5F7] capitalize">
+                                        {user.name || 'Not specified'}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-2xl font-medium text-[#6E6E73] dark:text-[#9B9BA1]">Email</span>
+                                    <span className="text-2xl font-medium text-[#1C1C1E] dark:text-[#F5F5F7]">
+                                        {user.email || 'Not specified'}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-2xl font-medium text-[#6E6E73] dark:text-[#9B9BA1]">Diabetes Type</span>
+                                    <span className="text-2xl font-medium text-[#1C1C1E] dark:text-[#F5F5F7] capitalize">
+                                        {user.diabetesType || 'Not specified'}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-2xl font-medium text-[#6E6E73] dark:text-[#9B9BA1]">Target Range</span>
+                                    <span className="text-2xl font-medium text-[#1C1C1E] dark:text-[#F5F5F7]">
+                                        {user.targetRange?.low} – {user.targetRange?.high} mg/dL
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+
+}
+
+export default Profile

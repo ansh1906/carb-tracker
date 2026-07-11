@@ -26,3 +26,8 @@ export const logout = async () => {
     throw error.response?.data || error;
   }
 };
+
+export const getMe = async () => {
+  const response = await api.get('/auth/me');
+  return response.data;
+};

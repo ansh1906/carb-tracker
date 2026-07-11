@@ -16,13 +16,13 @@ function Navbar() {
       <span className="text-lg font-semibold text-[#1C1C1E] dark:text-[#F5F5F7]">
         GlucoTrack
       </span>
-
+        
       <div className="flex items-center gap-4">
         <button
           onClick={toggleTheme}
-          className="text-sm text-[#6E6E73] dark:text-[#9B9BA1] hover:text-[#1C1C1E] dark:hover:text-white transition-colors"
+          className="text-sm  bg-white dark:bg-[#1C1C1E] border-b border-gray-100 dark:border-gray-800 text-[#6E6E73] dark:text-[#9B9BA1] hover:text-[#1C1C1E] rounded-full dark:hover:text-white transition-colors"
         >
-          {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+          {theme === 'dark' ? 'Light mode' : 'Dark mode'}
         </button>
 
         <button
@@ -30,6 +30,12 @@ function Navbar() {
           className="text-sm font-medium text-white bg-[#2563EB] px-4 py-2 rounded-full hover:bg-blue-700 transition-colors"
         >
           Logout
+        </button>
+        <button
+          onClick={()=>navigate('/profile')}
+          className="text-sm font-medium text-white bg-[#2563EB] px-4 py-2 rounded-full hover:bg-blue-700 transition-colors"
+        >
+          Profile
         </button>
       </div>
     </nav>
