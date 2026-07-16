@@ -58,8 +58,82 @@ async function getReadingsByRange(req, res) {
     }
 }
 
+async function getTimeInRange(req, res) {
+    try {
+        const { start, end } = req.query;
+        const { low, high } = req.user.targetBloodSugar;
+
+        if (!start || !end) {
+            return res.status(400).json({ message: 'Please provide start and end dates.' });
+        }
+
+        const result = await GlucoseReadingModel.aggregate([
+            {
+                $match: {
+                    user: req.user._id,
+                    date: {
+                        $gte: new Date(start),
+                        $lte: new Date(end)
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalReadings: { $sum: 1 },
+                    belowRange: {
+                        $sum: {
+                            $cond: [{ $lt: ['$reading', low] }, 1, 0]
+                        }
+                    },
+                    inRange: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $and: [
+                                        { $gte: ['$reading', low] },
+                                        { $lte: ['$reading', high] }
+                                    ]
+                                },1,0]
+                        }
+                    },
+                    aboveRange: {
+                        $sum: {
+                            $cond: [{ $gt: ['$reading', high] }, 1, 0]
+                        }
+                    }
+                }
+            }
+        ]);
+
+        const data = result[0];
+
+        if (!data) {
+            return res.status(200).json({
+                belowRangePercent: 0,
+                inRangePercent: 0,
+                aboveRangePercent: 0
+            });
+        }
+
+        const belowRangePercent = (data.belowRange / data.totalReadings) * 100;
+        const inRangePercent = (data.inRange / data.totalReadings) * 100;
+        const aboveRangePercent = (data.aboveRange / data.totalReadings) * 100;
+        console.log('TARGET BLOOD SUGAR:', req.user.targetBloodSugar);
+        return res.status(200).json({
+            belowRangePercent,
+            inRangePercent,
+            aboveRangePercent
+        });
+    } catch (err) {
+        console.error('GET TIME IN RANGE ERROR:', err);
+        return res.status(500).json({ message: err.message });
+    }
+}
+
 module.exports = {
     createReading,
     getRecentReadings,
-    getReadingsByRange
+    getReadingsByRange,
+    getTimeInRange
 };

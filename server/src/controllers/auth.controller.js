@@ -99,12 +99,15 @@ async function loginUser(req, res) {
 
 async function updateProfile(req, res) {
     try {
-        const { diabetesType } = req.body;
+        const { diabetesType, targetBloodSugar } = req.body;
 
         // Update the user's profile
         const updatedUser = await userModel.findByIdAndUpdate(
             req.user._id,
-            { diabetesType },
+            {
+                diabetesType,
+                targetBloodSugar
+            },
             { returnDocument: 'after'}
         );
 

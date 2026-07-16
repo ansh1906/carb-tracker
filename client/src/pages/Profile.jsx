@@ -9,6 +9,8 @@ function Profile() {
     const [error,setError] = useState('');
     const [saving, setSaving] = useState(false);
     const [success, setSuccess] = useState('');
+    const [targetLow, setTargetLow] = useState(70);
+    const [targetHigh, setTargetHigh] = useState(180);
 
     useEffect(()=>{
         const fetchUser = async ()=> {
@@ -16,6 +18,8 @@ function Profile() {
                 const data = await getMe();
                 console.log(data)
                 setUser(data.user);
+                setTargetLow(data.user.targetBloodSugar?.low || 70);
+                setTargetHigh(data.user.targetBloodSugar?.high || 180);
             }catch{
                 setError('Failed to load profile')
             }finally{
@@ -31,8 +35,17 @@ function Profile() {
             setError('');
             setSuccess('');
 
+            if (targetLow > targetHigh) {
+                setError('Low target cannot be higher than high target');
+                return;
+            }
+
             const data = await updateProfile({
                 diabetesType: user.diabetesType,
+                targetBloodSugar: {
+                    low: targetLow,
+                    high: targetHigh
+                }
             });
 
             setUser(data.user || user);
@@ -63,14 +76,14 @@ function Profile() {
 
             <div className="w-full max-w-175 mx-auto relative z-10 px-6 py-12">
                 <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-xl shadow-black/5 p-8">
+                    {error && error !== 'Low target cannot be higher than high target' && (
+                        <p className="text-sm text-red-500 text-center">{error}</p>
+                    )}
+
                     {loading && (
                         <p className="text-sm text-[#6E6E73] dark:text-[#9B9BA1] text-center">
                             Loading profile...
                         </p>
-                    )}
-
-                    {error && (
-                        <p className="text-sm text-red-500 text-center">{error}</p>
                     )}
 
                     {user && !loading && (
@@ -118,12 +131,43 @@ function Profile() {
                                         <option value="other">Other</option>
                                     </select>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-lg font-medium text-[#6E6E73] dark:text-[#9B9BA1]">Target Range</span>
-                                    <span className="text-lg font-medium text-[#1C1C1E] dark:text-[#F5F5F7]">
-                                        {user.targetRange?.low} – {user.targetRange?.high} mg/dL
+                                <div className="flex items-center justify-between gap-3">
+                                    <span className="text-lg font-medium text-[#6E6E73] dark:text-[#9B9BA1] whitespace-nowrap">
+                                        Target Range
                                     </span>
+                                    <div className="flex items-center justify-end gap-3 flex-1">
+                                        <select
+                                            value={targetLow}
+                                            onChange={(e) => setTargetLow(Number(e.target.value))}
+                                            className="text-lg font-medium text-[#1C1C1E] dark:text-[#F5F5F7] bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1 outline-none focus:ring-2 focus:ring-[#2563EB]"
+                                        >
+                                            {Array.from({ length: 20 }, (_, i) => (i + 7) * 10).map((value) => (
+                                                <option key={value} value={value}>{value}</option>
+                                            ))}
+                                        </select>
+
+                                        <span className="text-lg font-medium text-[#6E6E73] dark:text-[#9B9BA1]">-</span>
+
+                                        <select
+                                            value={targetHigh}
+                                            onChange={(e) => setTargetHigh(Number(e.target.value))}
+                                            className="text-lg font-medium text-[#1C1C1E] dark:text-[#F5F5F7] bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1 outline-none focus:ring-2 focus:ring-[#2563EB]"
+                                        >
+                                            {Array.from({ length: 20 }, (_, i) => (i + 9) * 10).map((value) => (
+                                                <option key={value} value={value}>{value}</option>
+                                            ))}
+                                        </select>
+
+                                        <span className="text-lg font-medium text-[#6E6E73] dark:text-[#9B9BA1] whitespace-nowrap">
+                                            mg/dL
+                                        </span>
+                                        </div>
                                 </div>
+                                {error === 'Low target cannot be higher than high target' && (
+                                    <p className="text-sm text-red-500 text-right mt-1">
+                                        {error}
+                                    </p>
+                                )}
                             </div>
 
                             {success && (
