@@ -7,4 +7,5 @@ Router.post('/register', authController.registerUser);
 Router.post('/login', authController.loginUser);
 Router.post('/logout', authController.logoutUser);
 Router.get('/me', authMiddleware, authController.getCurrentUser);
+Router.put('/profile', authMiddleware, authController.updateProfile);
 module.exports = Router;

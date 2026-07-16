@@ -17,6 +17,7 @@ function Dashboard() {
 
         try {
             const data = await createMeal(description);
+            console.log('Meal logged successfully:', data);
             setResult(data.meal);
         } catch (err) {
             setError(err.message || 'Failed to analyze meal.');
@@ -42,7 +43,7 @@ function Dashboard() {
                 />
             </div>
             <div className="relative z-10 w-[80vw] max-w-3xl mx-auto px-6 py-12">
-                <div className="bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-sm rounded-2xl shadow-xl shadow-black/5 p-8">
+                <div className="bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-sm transition-colors duration-300 rounded-2xl shadow-xl shadow-black/5 p-8">
                     <h1 className="text-2xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] mb-6">
                         Log a Meal
                     </h1>

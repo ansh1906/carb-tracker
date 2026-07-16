@@ -18,7 +18,7 @@ const userSchema = mongoose.Schema({
     },
     diabetesType: {
         type: String,
-        enum: ['Type 1', 'Type 2', 'Gestational', 'Other'],
+        enum: ['Type 1', 'Type 2', 'Gestational','Prediabetes', 'Other'],
         // required: true
     },
     age: {

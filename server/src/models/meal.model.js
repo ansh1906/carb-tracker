@@ -25,7 +25,16 @@ const mealSchema = mongoose.Schema({
         fatGrams: {
             type: Number,
             required: true
-        }
+        },
+        fiberGrams: {
+            type: Number,
+            required: true
+        },
+        sugarGrams: {
+            type: Number,
+            required: true
+        }   
+
     },
     glycemicLoad: {
         type: String,

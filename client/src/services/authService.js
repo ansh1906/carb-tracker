@@ -9,12 +9,21 @@ export const login = async (email, password) => {
   }
 };
 
-export const register = async (name,email, password) => {
+export const register = async (name,email, password,type, targetLow, targetHigh) => {
   try {
-    const response = await api.post('/auth/register', { name,email, password });
+    const response = await api.post('/auth/register', { name,email, password,type, targetLow, targetHigh });
     return response.data;
   } catch (error) {
     throw error.response?.data||error; // Throw the error response data for handling in the component
+  }
+};
+
+export const updateProfile = async (profileData) => {
+  try {
+    const response = await api.put('/auth/profile', profileData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error; // Throw the error response data for handling in the component
   }
 };
 

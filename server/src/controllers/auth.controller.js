@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 
 async function registerUser(req, res) {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, type, targetLow, targetHigh } = req.body;
 
         const userExists = await userModel.findOne({ email });
 
@@ -17,7 +17,10 @@ async function registerUser(req, res) {
         const user = await userModel.create({
             name,
             email,
-            password
+            password,
+            type,
+            targetLow,
+            targetHigh
         });
 
         const token = jwt.sign(
@@ -94,6 +97,30 @@ async function loginUser(req, res) {
     }
 }
 
+async function updateProfile(req, res) {
+    try {
+        const { diabetesType } = req.body;
+
+        // Update the user's profile
+        const updatedUser = await userModel.findByIdAndUpdate(
+            req.user._id,
+            { diabetesType },
+            { returnDocument: 'after'}
+        );
+
+        return res.status(200).json({
+            success: true,
+            user: updatedUser
+        });
+    } catch (err) {
+        console.error('UPDATE PROFILE ERROR:', err);
+
+        return res.status(500).json({
+            message: err.message
+        });
+    }
+}
+
 async function logoutUser(req, res) {
     try {
         res.clearCookie('token', {
@@ -121,5 +148,9 @@ const getCurrentUser = async (req, res) => {
     });
 };
 module.exports = {
-    registerUser,loginUser,logoutUser,getCurrentUser
+    registerUser,
+    loginUser,
+    updateProfile,
+    logoutUser,
+    getCurrentUser
 };

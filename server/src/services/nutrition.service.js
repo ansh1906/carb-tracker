@@ -49,7 +49,10 @@ async function getNutritionInfo(mealDescription) {
         );
 
         if (!response.ok) {
-            throw new Error(`Error fetching nutrition info: ${response.statusText}`);
+            const errorBody = await response.text();
+            throw new Error(
+                `Gemini API error (${response.status}): ${errorBody}`
+            );
         }
 
         const data = await response.json();

@@ -8,6 +8,9 @@ function Register() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [type, setType] = useState('');
+    const [targetLow, setTargetLow] = useState(80);
+    const [targetHigh, setTargetHigh] = useState(130);
     const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
@@ -15,9 +18,9 @@ function Register() {
         setError('');
 
         try {
-            const data = await register(name, email, password);
+            const data = await register(name, email, password, type, targetLow, targetHigh);
             console.log('User registered successfully:', data);
-            navigate('/login');
+            navigate('/dashboard');
         } catch (err) {
             setError(err.message || 'Failed to register user.');
         }
@@ -39,7 +42,7 @@ function Register() {
                 />
             </div>
 
-            <div className="relative z-10 w-full max-w-sm bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-xl shadow-black/5 p-8">
+            <div className="relative z-10 w-full max-w-130 bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-xl shadow-black/5 p-8">
                 <h1 className="text-2xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] mb-6 text-center">
                     Create your account
                 </h1>
@@ -68,6 +71,48 @@ function Register() {
                         required
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent text-[#1C1C1E] dark:text-[#F5F5F7] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all"
                     />
+                    <select
+                        value={type}
+                        onChange={(e) => setType(e.target.value)}
+                        required
+                        className="w-full text-lg font-medium text-[#1C1C1E] dark:text-[#F5F5F7] bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-3 outline-none focus:ring-2 focus:ring-[#2563EB]"
+                    >
+                        <option value="">Select diabetes type</option>
+                        <option value="type 1">Type 1</option>
+                        <option value="type 2">Type 2</option>
+                        <option value="gestational">Gestational</option>
+                        <option value="prediabetes">Prediabetes</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-lg font-medium text-[#1C1C1E] dark:text-[#F5F5F7] whitespace-nowrap">
+                            Target Range
+                        </h1>
+
+                        <select
+                            value={targetLow}
+                            onChange={(e) => setTargetLow(Number(e.target.value))}
+                            className="flex-1 text-lg font-medium text-[#1C1C1E] dark:text-[#F5F5F7] bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1 outline-none focus:ring-2 focus:ring-[#2563EB]"
+                        >
+                            {Array.from({ length: 14 }, (_, i) => (i + 7) * 10).map((value) => (
+                                <option key={value} value={value}>{value}</option>
+                            ))}
+                        </select>
+
+                        <span className="text-lg font-medium text-[#6E6E73] dark:text-[#9B9BA1]">-</span>
+
+                        <select
+                            value={targetHigh}
+                            onChange={(e) => setTargetHigh(Number(e.target.value))}
+                            className="flex-1 text-lg font-medium text-[#1C1C1E] dark:text-[#F5F5F7] bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1 outline-none focus:ring-2 focus:ring-[#2563EB]"
+                        >
+                            {Array.from({ length: 22 }, (_, i) => (i + 13) * 10).map((value) => (
+                                <option key={value} value={value}>{value}</option>
+                            ))}
+                        </select>
+                    </div>
+                    
+
                     <button
                         type="submit"
                         className="w-full bg-[#2563EB] text-white font-medium py-3 rounded-xl hover:bg-blue-700 active:scale-[0.98] transition-all"

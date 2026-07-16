@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import DotGrid from '../components/test';
-import { getMe } from '../services/authService';
+import { getMe, updateProfile } from '../services/authService';
 import Navbar from '../components/navbar';
 
 function Profile() {
     const [user,setUser] = useState(null);
     const [loading,setLoading] = useState(true);
     const [error,setError] = useState('');
+    const [saving, setSaving] = useState(false);
+    const [success, setSuccess] = useState('');
 
     useEffect(()=>{
         const fetchUser = async ()=> {
@@ -22,6 +24,26 @@ function Profile() {
         }
         fetchUser();
     },[])
+
+    const handleSave = async () => {
+        try {
+            setSaving(true);
+            setError('');
+            setSuccess('');
+
+            const data = await updateProfile({
+                diabetesType: user.diabetesType,
+            });
+
+            setUser(data.user || user);
+            setSuccess('Profile updated successfully');
+        } catch (err) {
+            setError('Failed to update profile');
+        } finally {
+            setSaving(false);
+        }
+    };
+
     return (
         <div className="relative min-h-screen bg-[#FAFAF9] dark:bg-[#121212] overflow-hidden">
             <div className="mt-17 absolute inset-0 z-0 overflow-hidden opacity-20">
@@ -68,32 +90,53 @@ function Profile() {
                             </p>
                             
                             {/* Specific details of user */}
-                            <div className="border-t font border-gray-100 dark:border-gray-800 pt-6 space-y-3">
+                            <div className="border-t border-gray-100 dark:border-gray-800 pt-6 space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-2xl font-medium text-[#6E6E73] dark:text-[#9B9BA1]">Name</span>
-                                    <span className="text-2xl font-medium text-[#1C1C1E] dark:text-[#F5F5F7] capitalize">
+                                    <span className="text-lg font-medium text-[#6E6E73] dark:text-[#9B9BA1]">Name</span>
+                                    <span className="text-lg font-medium text-[#1C1C1E] dark:text-[#F5F5F7] capitalize">
                                         {user.name || 'Not specified'}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-2xl font-medium text-[#6E6E73] dark:text-[#9B9BA1]">Email</span>
-                                    <span className="text-2xl font-medium text-[#1C1C1E] dark:text-[#F5F5F7]">
+                                    <span className="text-lg font-medium text-[#6E6E73] dark:text-[#9B9BA1]">Email</span>
+                                    <span className="text-lg font-medium text-[#1C1C1E] dark:text-[#F5F5F7]">
                                         {user.email || 'Not specified'}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-2xl font-medium text-[#6E6E73] dark:text-[#9B9BA1]">Diabetes Type</span>
-                                    <span className="text-2xl font-medium text-[#1C1C1E] dark:text-[#F5F5F7] capitalize">
-                                        {user.diabetesType || 'Not specified'}
-                                    </span>
+                                    <span className="text-lg font-medium text-[#6E6E73] dark:text-[#9B9BA1]">Diabetes Type</span>
+                                    <select
+                                        value={user.diabetesType || ''}
+                                        onChange={(e) => setUser({ ...user, diabetesType: e.target.value })}
+                                        className="text-lg font-medium text-[#1C1C1E] dark:text-[#F5F5F7] bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1 outline-none focus:ring-2 focus:ring-[#2563EB]"
+                                    >
+                                        <option value="">Select type</option>
+                                        <option value="type 1">Type 1</option>
+                                        <option value="type 2">Type 2</option>
+                                        <option value="gestational">Gestational</option>
+                                        <option value="prediabetes">Prediabetes</option>
+                                        <option value="other">Other</option>
+                                    </select>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-2xl font-medium text-[#6E6E73] dark:text-[#9B9BA1]">Target Range</span>
-                                    <span className="text-2xl font-medium text-[#1C1C1E] dark:text-[#F5F5F7]">
+                                    <span className="text-lg font-medium text-[#6E6E73] dark:text-[#9B9BA1]">Target Range</span>
+                                    <span className="text-lg font-medium text-[#1C1C1E] dark:text-[#F5F5F7]">
                                         {user.targetRange?.low} – {user.targetRange?.high} mg/dL
                                     </span>
                                 </div>
                             </div>
+
+                            {success && (
+                                <p className="text-sm text-green-500 text-center mt-6">{success}</p>
+                            )}
+
+                            <button
+                                onClick={handleSave}
+                                disabled={saving}
+                                className="w-full mt-8 py-3 rounded-xl bg-[#2563EB] text-white font-medium hover:bg-[#1D4ED8] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {saving ? 'Saving...' : 'Save Changes'}
+                            </button>
                         </div>
                     )}
                 </div>
