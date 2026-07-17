@@ -4,6 +4,7 @@ const app = express();
 const authRoutes = require('./routes/auth.routes');
 const mealRoutes = require('./routes/meal.routes');
 const readingRoutes = require('./routes/glucoseReading.routes');
+const newsRoutes = require('./routes/news.routes');
 const cookieParser = require('cookie-parser');
 
 app.use(cors({
@@ -15,6 +16,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/meals', mealRoutes);
 app.use('/api/readings', readingRoutes);
+app.use('/api/news', newsRoutes);
 
 
 
