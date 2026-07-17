@@ -1,13 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createMeal } from '../services/mealService';
+import { getMe, updateProfile } from '../services/authService';
 import Navbar from '../components/navbar';
 import AnalyzingLoader from '../components/AnalyzingLoader';
 import DotGrid from '../components/test';
+import SpectacularButton from '../components/SpectacularButton';
+import { createReading, getTimeInRange } from '../services/glucoseService';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import SplitText from '../components/SplitText';
+
 function Dashboard() {
     const [description, setDescription] = useState('');
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [user,setUser] = useState(null);
+    const [targetLow, setTargetLow] = useState(70);
+    const [targetHigh, setTargetHigh] = useState(150);
+    
+
+    const [reading, setReading] = useState('');
+    const [context, setContext] = useState('Random');
+    const [readingError, setReadingError] = useState('');
+    const [tirData, setTirData] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -26,6 +41,62 @@ function Dashboard() {
         } 
     };
 
+    const fetchTimeInRange = async () => {
+        try {
+            const end = new Date().toISOString();
+            const start = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+            const data = await getTimeInRange(start, end);
+            setTirData(data);
+        } catch (err) {
+            console.error('Failed to load time-in-range', err);
+        }
+    };
+    
+
+    useEffect(() => {
+        fetchTimeInRange();
+        const fetchUser = async ()=> {
+            try{
+                const data = await getMe();
+                console.log(data)
+                setUser(data.user);
+                setTargetLow(data.user.targetBloodSugar?.low || 70);
+                setTargetHigh(data.user.targetBloodSugar?.high || 180);
+            }catch{
+                setError('Failed to load profile')
+            }finally{
+                setLoading(false);
+            }
+        }
+        fetchUser();
+    }, []);
+
+    const handleLogReading = async (e) => {
+        e.preventDefault();
+        setReadingError('');
+        try {
+            await createReading({reading: Number(reading), context, note: ''});
+            setReading('');
+            fetchTimeInRange(); // refresh chart with the new reading included
+        } catch (err) {
+            setReadingError(err.message || 'Failed to log reading.');
+        }
+    };
+
+    const chartData = tirData
+        ? [
+              { name: 'Below Range', value: tirData.belowRangePercent },
+              { name: 'In Range', value: tirData.inRangePercent },
+              { name: 'Above Range', value: tirData.aboveRangePercent },
+          ]
+        : [];
+
+    const COLORS = ['#F59E0B', '#0D9488', '#DC2626'];
+
+    const handleAnimationComplete = () => {
+      console.log('All letters have animated!');
+    };
+
     return ( 
         <div className="relative bg-[#FAFAF9] dark:bg-[#121212] min-h-screen overflow-hidden">
             <Navbar />
@@ -42,28 +113,43 @@ function Dashboard() {
                     returnDuration={1.5}
                 />
             </div>
-            <div className="relative z-10 w-[80vw] max-w-3xl mx-auto px-6 py-12">
+            <div className="relative z-10 w-[80vw] max-w-5xl mx-auto px-6 py-12">
+                <SplitText
+                text={`Hello       ${user?.name || 'User'}!`}
+                className="w-full mb-5 text-5xl md:text-6xl dark:text-white text-gray-900 font-semibold text-center block"
+                delay={20}
+                duration={1.1}
+                ease="power3.out"
+                splitType="chars"
+                from={{ opacity: 0, y: 40 }}
+                to={{ opacity: 1, y: 0 }}
+                threshold={0.1}
+                rootMargin="-100px"
+                textAlign="center"
+                onLetterAnimationComplete={handleAnimationComplete}
+                showCallback
+                />
                 <div className="bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-sm transition-colors duration-300 rounded-2xl shadow-xl shadow-black/5 p-8">
-                    <h1 className="text-2xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] mb-6">
+                    <h1 className="text-3xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] mb-8">
                         Log a Meal
                     </h1>
 
-                    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                    <form onSubmit={handleSubmit} className="flex items-center flex-col gap-5">
                         <input
                             type="text"
                             placeholder="e.g. 2 rotis and dal"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             required
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent text-[#1C1C1E] dark:text-[#F5F5F7] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all"
+                            className="w-full px-5 py-4 text-lg rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent text-[#1C1C1E] dark:text-[#F5F5F7] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-transparent transition-all"
                         />
-                        <button
+                        <SpectacularButton
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-[#2563EB] text-white font-medium py-3 rounded-xl hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-3xl bg-[#739fff] dark:text-white text-gray-800 text-lg font-medium py-4 rounded-xl hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Log Meal
-                        </button>
+                        </SpectacularButton>
                     </form>
 
                     {loading && <AnalyzingLoader />}
@@ -96,6 +182,83 @@ function Dashboard() {
                             </p>
                         </div>
                     )}
+                </div>
+                {/* --- Glucose reading + chart, side by side --- */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+
+                    {/* Reading form */}
+                    <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-xl shadow-black/5 p-12">
+                        <h2 className="text-2xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] mb-8">
+                            Log a Glucose Reading
+                        </h2>
+                        <form onSubmit={handleLogReading} className="flex flex-col gap-5">
+                            <input
+                                type="number"
+                                placeholder="e.g. 120"
+                                value={reading}
+                                onChange={(e) => setReading(e.target.value)}
+                                required
+                                className="w-full px-5 py-4 text-lg rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent text-[#1C1C1E] dark:text-[#F5F5F7] focus:outline-none focus:ring-2 focus:ring-[#2563EB] transition-all"
+                            />
+                            <select
+                                value={context}
+                                onChange={(e) => setContext(e.target.value)}
+                                className="w-full px-5 py-4 text-lg rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent text-[#1C1C1E] dark:text-[#F5F5F7] focus:outline-none focus:ring-2 focus:ring-[#2563EB] transition-all"
+                            >
+                                <option value="Fasting">Fasting</option>
+                                <option value="Before Meal">Before Meal</option>
+                                <option value="After Meal">After Meal</option>
+                                <option value="Random">Random</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <button
+                                type="submit"
+                                className="w-full bg-[#2563EB] text-white text-lg font-medium py-4 rounded-xl hover:bg-blue-700 active:scale-[0.98] transition-all"
+                            >
+                                Log Reading
+                            </button>
+                        </form>
+                        {readingError && (
+                            <p className="text-sm text-red-500 mt-4 text-center">{readingError}</p>
+                        )}
+                    </div>
+
+                    {/* Chart — bigger, no card wrapper */}
+                    <div className="flex flex-col items-center justify-center py-6">
+                        <h2 className="text-2xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] mb-1 self-start">
+                            Time in Range
+                        </h2>
+                        <p className="text-sm text-[#6E6E73] dark:text-[#9B9BA1] mb-4 self-start">
+                            Last 7 days
+                        </p>
+                        {tirData ? (
+                            <ResponsiveContainer width="100%" height={380}>
+                                <PieChart>
+                                    <Pie
+                                        data={chartData}
+                                        dataKey="value"
+                                        nameKey="name"
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={130}
+                                        innerRadius={50}
+                                        paddingAngle={0}
+                                        label={({ value }) => (value > 0 ? `${value.toFixed(0)}%` : '')}
+                                    >
+                                        {chartData.map((entry, index) => (
+                                            <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                    <Legend wrapperStyle={{ fontSize: '16px' }} />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <p className="text-base text-[#6E6E73] dark:text-[#9B9BA1] py-16">
+                                No readings yet — log one to see your trend.
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

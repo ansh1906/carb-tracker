@@ -26,10 +26,12 @@ const userSchema = mongoose.Schema({
     },
     targetBloodSugar: {
         low: {
-            type: Number
+            type: Number,
+            default: 70
         },
         high: {
-            type: Number
+            type: Number,
+            default: 150
         }
     }
 }, { timestamps: true });
