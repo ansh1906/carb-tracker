@@ -22,6 +22,7 @@ function Dashboard() {
     const [reading, setReading] = useState('');
     const [context, setContext] = useState('Random');
     const [readingError, setReadingError] = useState('');
+    const [note, setNote] = useState('');
     const [tirData, setTirData] = useState(null);
 
     const handleSubmit = async (e) => {
@@ -58,7 +59,6 @@ function Dashboard() {
         const fetchUser = async ()=> {
             try{
                 const data = await getMe();
-                console.log(data)
                 setUser(data.user);
                 setTargetLow(data.user.targetBloodSugar?.low || 70);
                 setTargetHigh(data.user.targetBloodSugar?.high || 180);
@@ -75,8 +75,13 @@ function Dashboard() {
         e.preventDefault();
         setReadingError('');
         try {
-            await createReading({reading: Number(reading), context, note: ''});
+            await createReading({
+                reading: Number(reading),
+                context,
+                note: context === 'Other' ? note : ''
+            });
             setReading('');
+            setNote('');
             fetchTimeInRange(); // refresh chart with the new reading included
         } catch (err) {
             setReadingError(err.message || 'Failed to log reading.');
@@ -114,21 +119,23 @@ function Dashboard() {
                 />
             </div>
             <div className="relative z-10 w-[80vw] max-w-5xl mx-auto px-6 py-12">
-                <SplitText
-                text={`Hello       ${user?.name || 'User'}!`}
-                className="w-full mb-5 text-5xl md:text-6xl dark:text-white text-gray-900 font-semibold text-center block"
-                delay={20}
-                duration={1.1}
-                ease="power3.out"
-                splitType="chars"
-                from={{ opacity: 0, y: 40 }}
-                to={{ opacity: 1, y: 0 }}
-                threshold={0.1}
-                rootMargin="-100px"
-                textAlign="center"
-                onLetterAnimationComplete={handleAnimationComplete}
-                showCallback
-                />
+                {user && (
+                    <SplitText
+                        text={`Hello       ${user.name}!`}
+                        className="w-full mb-5 text-5xl md:text-6xl dark:text-white text-gray-900 font-semibold text-center block"
+                        delay={20}
+                        duration={1.1}
+                        ease="power3.out"
+                        splitType="chars"
+                        from={{ opacity: 0, y: 40 }}
+                        to={{ opacity: 1, y: 0 }}
+                        threshold={0.1}
+                        rootMargin="-100px"
+                        textAlign="center"
+                        onLetterAnimationComplete={handleAnimationComplete}
+                        showCallback
+                    />
+                )}
                 <div className="bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-sm transition-colors duration-300 rounded-2xl shadow-xl shadow-black/5 p-8">
                     <h1 className="text-3xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] mb-8">
                         Log a Meal
@@ -187,11 +194,11 @@ function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
 
                     {/* Reading form */}
-                    <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-xl shadow-black/5 p-12">
-                        <h2 className="text-2xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] mb-8">
+                    <div className="bg-white mb-8 dark:bg-[#1C1C1E] rounded-2xl shadow-xl shadow-black/5 p-9">
+                        <h2 className="text-3xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] mb-8">
                             Log a Glucose Reading
                         </h2>
-                        <form onSubmit={handleLogReading} className="flex flex-col gap-5">
+                        <form onSubmit={handleLogReading} className="flex items-center flex-col gap-5">
                             <input
                                 type="number"
                                 placeholder="e.g. 120"
@@ -211,12 +218,23 @@ function Dashboard() {
                                 <option value="Random">Random</option>
                                 <option value="Other">Other</option>
                             </select>
-                            <button
+                            {context === 'Other' && (
+                                <input
+                                    type="text"
+                                    placeholder="Add a note about this reading"
+                                    value={note}
+                                    onChange={(e) => setNote(e.target.value)}
+                                    required
+                                    className="w-full px-5 py-4 text-lg rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent text-[#1C1C1E] dark:text-[#F5F5F7] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2563EB] transition-all"
+                                />
+                            )}
+                            <SpectacularButton
                                 type="submit"
-                                className="w-full bg-[#2563EB] text-white text-lg font-medium py-4 rounded-xl hover:bg-blue-700 active:scale-[0.98] transition-all"
+                                disabled={loading}
+                                className="w-85 items-center bg-[#739fff] dark:text-white text-gray-800 text-lg font-medium py-4 rounded-xl hover:bg-blue-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Log Reading
-                            </button>
+                                Log Meal
+                            </SpectacularButton>
                         </form>
                         {readingError && (
                             <p className="text-sm text-red-500 mt-4 text-center">{readingError}</p>
@@ -225,10 +243,10 @@ function Dashboard() {
 
                     {/* Chart — bigger, no card wrapper */}
                     <div className="flex flex-col items-center justify-center py-6">
-                        <h2 className="text-2xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] mb-1 self-start">
+                        <h2 className="text-2xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] mb-1 -mt-5 self-start">
                             Time in Range
                         </h2>
-                        <p className="text-sm text-[#6E6E73] dark:text-[#9B9BA1] mb-4 self-start">
+                        <p className="text-sm text-[#6E6E73] dark:text-[#9B9BA1] -mb-15 mr-0.5 self-start">
                             Last 7 days
                         </p>
                         {tirData ? (
@@ -238,7 +256,7 @@ function Dashboard() {
                                         data={chartData}
                                         dataKey="value"
                                         nameKey="name"
-                                        cx="50%"
+                                        cx="55%"
                                         cy="50%"
                                         outerRadius={130}
                                         innerRadius={50}
