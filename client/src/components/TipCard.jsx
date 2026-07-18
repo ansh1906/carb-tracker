@@ -45,8 +45,8 @@ function TipCard() {
 
             {tip && !loading && (
                 <div className="animate-fadeIn">
-                    <h3 className="text-lg font-semibold text-[#2563EB] mb-2">{tip.title}</h3>
-                    <p className="text-sm text-[#1C1C1E] dark:text-[#F5F5F7]">{tip.tip}</p>
+                    <h3 className="text-2xl font-bold text-[#355393] mb-2">{tip.title}</h3>
+                    <p className="text-xl text-[#1C1C1E] dark:text-[#F5F5F7]">{tip.tip}</p>
                 </div>
             )}
         </div>
