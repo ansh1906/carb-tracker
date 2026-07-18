@@ -8,6 +8,7 @@ import SpectacularButton from '../components/SpectacularButton';
 import { createReading, getTimeInRange } from '../services/glucoseService';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import SplitText from '../components/SplitText';
+import TipCard from '../components/TipCard';
 
 function Dashboard() {
     const [description, setDescription] = useState('');
@@ -103,9 +104,10 @@ function Dashboard() {
     };
 
     return ( 
-        <div className="relative bg-[#FAFAF9] dark:bg-[#121212] min-h-screen overflow-hidden">
+        <div className="relative min-h-screen bg-[#FAFAF9] dark:bg-[#121212]">
             <Navbar />
-            <div className="mt-17 absolute inset-0 z-0 overflow-hidden opacity-10 dark:opacity-30 pointer-events-none">
+            <div className="relative min-h-screen pb-12">
+            <div className="fixed inset-0 z-0 overflow-hidden opacity-10 dark:opacity-30 pointer-events-none">
                 <DotGrid
                     dotSize={4}
                     gap={15}
@@ -278,6 +280,10 @@ function Dashboard() {
                         )}
                     </div>
                 </div>
+            </div>
+            <div className="max-w-7xl place-self-center mt-20 px-6">
+                <TipCard/>
+            </div>
             </div>
         </div>
     );
