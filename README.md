@@ -45,11 +45,11 @@ GlucoTrack helps people with diabetes track meals, log blood glucose readings, a
 
 ## Screenshots
 
-### Dashboard — Registration page
+### Registration page
 
 ![Dashboard](docs/screenshots/register.png)
 
-### Dashboard — Dashboard
+### Dashboard
 
 ![Dashboard](docs/screenshots/dashboardlight.png)
 ![Dashboard](docs/screenshots/dashboard.png)
@@ -59,7 +59,7 @@ GlucoTrack helps people with diabetes track meals, log blood glucose readings, a
 
 ![Dashboard](docs/screenshots/meal.png)
 
-### Dashboard — Profile Page
+### Profile Page
 
 ![Dashboard](docs/screenshots/profile.png)
 
