@@ -6,7 +6,6 @@ GlucoTrack helps people with diabetes track meals, log blood glucose readings, a
 
 > **Why I built this:** As someone managing diabetes myself, I wanted a tool that didn't just log numbers, but actually helped me understand *why* my glucose behaves the way it does — especially without the repetitive task of manually looking up carb counts for every meal. GlucoTrack is that tool.
 
-**[Live Demo](#)** · **[GitHub Repo](#)**
 
 ---
 
