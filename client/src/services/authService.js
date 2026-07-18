@@ -18,6 +18,15 @@ export const register = async (name,email, password,type, targetLow, targetHigh)
   }
 };
 
+export const verifyOTP = async (email, otp) => {
+  try {
+    const response = await api.post('/auth/verify-otp', { email, otp });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
 export const updateProfile = async (profileData) => {
   try {
     const response = await api.put('/auth/profile', profileData);

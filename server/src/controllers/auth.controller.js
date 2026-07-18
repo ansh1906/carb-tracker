@@ -1,27 +1,93 @@
 const userModel = require('../models/user.model');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const OTPModel = require('../models/otp.model');
+const { sendOTPEmail } = require('../services/email.service');
 
 async function registerUser(req, res) {
     try {
-        const { name, email, password, type, targetLow, targetHigh } = req.body;
-
-        const userExists = await userModel.findOne({ email });
-
-        if (userExists) {
-            return res.status(409).json({
-                message: 'User already exists.'
-            });
-        }
-
-        const user = await userModel.create({
+        const {
             name,
             email,
             password,
             type,
             targetLow,
             targetHigh
+        } = req.body;
+
+        const userExists = await userModel.findOne({ email });
+        if (userExists) {
+            return res.status(409).json({
+                message: 'User already exists.'
+            });
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        await OTPModel.findOneAndUpdate(
+            { email },
+            {
+                email,
+                otp,
+                userData: {
+                    name,
+                    email,
+                    password,
+                    diabetesType: type,
+                    targetBloodSugar: {
+                        low: targetLow,
+                        high: targetHigh
+                    }
+                },
+                expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+            },
+            {
+                upsert: true,
+                returnDocument: 'after'
+            }
+        );
+
+        await sendOTPEmail(email, otp);
+        return res.status(200).json({
+            message: 'OTP sent successfully.'
         });
+    } catch (err) {
+        console.error('REGISTER ERROR:', err);
+
+        return res.status(500).json({
+            message: err.message
+        });
+    }
+}
+
+async function verifyOTP(req, res) {
+    try {
+        const { email, otp } = req.body;
+
+        const otpRecord = await OTPModel.findOne({ email });
+
+        if (!otpRecord) {
+            return res.status(400).json({
+                message: 'OTP not found or expired.'
+            });
+        }
+
+        if (otpRecord.expiresAt < new Date()) {
+            await OTPModel.deleteOne({ email });
+
+            return res.status(400).json({
+                message: 'OTP has expired.'
+            });
+        }
+
+        if (otpRecord.otp !== otp) {
+            return res.status(400).json({
+                message: 'Invalid OTP.'
+            });
+        }
+
+        const user = await userModel.create(otpRecord.userData);
+
+        await OTPModel.deleteOne({ email });
 
         const token = jwt.sign(
             { id: user._id },
@@ -39,12 +105,11 @@ async function registerUser(req, res) {
         return res.status(201).json({
             _id: user._id,
             name: user.name,
-            email: user.email,
-            accessToken: token,
+            email: user.email
         });
-    } catch (err) {
-        console.error('REGISTER ERROR:', err);
 
+    } catch (err) {
+        console.error('VERIFY OTP ERROR:', err);
         return res.status(500).json({
             message: err.message
         });
@@ -152,6 +217,7 @@ const getCurrentUser = async (req, res) => {
 };
 module.exports = {
     registerUser,
+    verifyOTP,
     loginUser,
     updateProfile,
     logoutUser,

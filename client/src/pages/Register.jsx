@@ -20,7 +20,7 @@ function Register() {
         try {
             const data = await register(name, email, password, type, targetLow, targetHigh);
             console.log('User registered successfully:', data);
-            navigate('/dashboard');
+            navigate('/verify-otp' , { state: { email } });
         } catch (err) {
             setError(err.message || 'Failed to register user.');
         }
@@ -78,11 +78,11 @@ function Register() {
                         className="w-full text-lg font-medium text-[#1C1C1E] dark:text-[#F5F5F7] bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-3 outline-none focus:ring-2 focus:ring-[#2563EB]"
                     >
                         <option value="">Select diabetes type</option>
-                        <option value="type 1">Type 1</option>
-                        <option value="type 2">Type 2</option>
-                        <option value="gestational">Gestational</option>
-                        <option value="prediabetes">Prediabetes</option>
-                        <option value="other">Other</option>
+                        <option value="Type 1">Type 1</option>
+                        <option value="Type 2">Type 2</option>
+                        <option value="Gestational">Gestational</option>
+                        <option value="Prediabetes">Prediabetes</option>
+                        <option value="Other">Other</option>
                     </select>
                     <div className="flex items-center gap-3">
                         <h1 className="text-lg font-medium text-[#1C1C1E] dark:text-[#F5F5F7] whitespace-nowrap">
