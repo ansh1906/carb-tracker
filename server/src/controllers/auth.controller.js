@@ -4,6 +4,30 @@ const bcrypt = require('bcrypt');
 const OTPModel = require('../models/otp.model');
 const { sendOTPEmail } = require('../services/email.service');
 
+function getJwtSecret(useRefreshSecret = false) {
+    return useRefreshSecret && process.env.JWT_REFRESH_SECRET
+        ? process.env.JWT_REFRESH_SECRET
+        : process.env.JWT_SECRET;
+}
+
+function setAuthCookies(res, accessToken, refreshToken) {
+    const cookieOptions = {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: process.env.NODE_ENV === 'production',
+    };
+
+    res.cookie('token', accessToken, {
+        ...cookieOptions,
+        maxAge: 15 * 60 * 1000
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+        ...cookieOptions,
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+}
+
 async function registerUser(req, res) {
     try {
         const {
@@ -89,18 +113,19 @@ async function verifyOTP(req, res) {
 
         await OTPModel.deleteOne({ email });
 
-        const token = jwt.sign(
+        const accessToken = jwt.sign(
             { id: user._id },
             process.env.JWT_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '15m' }
         );
 
-        res.cookie('token', token, {
-            httpOnly: true,
-            sameSite: 'strict',
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 24 * 60 * 60 * 1000
-        });
+        const refreshToken = jwt.sign(
+            { id: user._id, type: 'refresh' },
+            getJwtSecret(true),
+            { expiresIn: '7d' }
+        );
+
+        setAuthCookies(res, accessToken, refreshToken);
 
         return res.status(201).json({
             _id: user._id,
@@ -136,18 +161,19 @@ async function loginUser(req, res) {
             });
         }
 
-        const token = jwt.sign(
+        const accessToken = jwt.sign(
             { id: user._id },
             process.env.JWT_SECRET,
-            { expiresIn: '1d' }
+            { expiresIn: '15m' }
         );
 
-        res.cookie('token', token, {
-            httpOnly: true,
-            sameSite: 'strict',
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 24 * 60 * 60 * 1000
-        });
+        const refreshToken = jwt.sign(
+            { id: user._id, type: 'refresh' },
+            getJwtSecret(true),
+            { expiresIn: '7d' }
+        );
+
+        setAuthCookies(res, accessToken, refreshToken);
 
         return res.status(200).json({
             name: user.name,
@@ -189,9 +215,58 @@ async function updateProfile(req, res) {
     }
 }
 
+async function refreshToken(req, res) {
+    try {
+        const refreshTokenValue = req.cookies.refreshToken;
+
+        if (!refreshTokenValue) {
+            return res.status(401).json({
+                message: 'No refresh token found.'
+            });
+        }
+
+        const decoded = jwt.verify(refreshTokenValue, getJwtSecret(true));
+        const user = await userModel.findById(decoded.id).select('-password');
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found.'
+            });
+        }
+
+        const accessToken = jwt.sign(
+            { id: user._id },
+            process.env.JWT_SECRET,
+            { expiresIn: '15m' }
+        );
+
+        const newRefreshToken = jwt.sign(
+            { id: user._id, type: 'refresh' },
+            getJwtSecret(true),
+            { expiresIn: '7d' }
+        );
+
+        setAuthCookies(res, accessToken, newRefreshToken);
+
+        return res.status(200).json({
+            message: 'Token refreshed successfully.'
+        });
+    } catch (err) {
+        console.error('REFRESH TOKEN ERROR:', err);
+        return res.status(401).json({
+            message: 'Invalid refresh token.'
+        });
+    }
+}
+
 async function logoutUser(req, res) {
     try {
         res.clearCookie('token', {
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: process.env.NODE_ENV === 'production',
+        });
+        res.clearCookie('refreshToken', {
             httpOnly: true,
             sameSite: 'strict',
             secure: process.env.NODE_ENV === 'production',
@@ -220,6 +295,7 @@ module.exports = {
     verifyOTP,
     loginUser,
     updateProfile,
+    refreshToken,
     logoutUser,
     getCurrentUser
 };
