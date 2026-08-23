@@ -1,6 +1,25 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+html,
+body,
+#root {
+  min-height: 100%;
+  background-color: #fafaf9;
+}
+
+html.dark,
+html.dark body,
+html.dark #root {
+  background-color: #121212;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+}
+
 @keyframes drift {
   0% { transform: translateX(-10%); }
   50% { transform: translateX(10%); }

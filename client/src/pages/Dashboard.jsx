@@ -9,6 +9,7 @@ import { createReading, getTimeInRange } from '../services/glucoseService';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import SplitText from '../components/SplitText';
 import TipCard from '../components/TipCard';
+import Sidebar from '../components/Sidebar';
 
 function Dashboard() {
     const [description, setDescription] = useState('');
@@ -25,6 +26,8 @@ function Dashboard() {
     const [readingError, setReadingError] = useState('');
     const [note, setNote] = useState('');
     const [tirData, setTirData] = useState(null);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -103,9 +106,20 @@ function Dashboard() {
       console.log('All letters have animated!');
     };
 
+    const scrollToNutritionTip = () => {
+        const tipSection = document.getElementById('nutrition-tip');
+        tipSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
     return ( 
         <div className="relative min-h-screen bg-[#FAFAF9] dark:bg-[#121212]">
-            <Navbar />
+            <Navbar onSidebarToggle={() => setMobileSidebarOpen(true)} />
+            <Sidebar
+                collapsed={sidebarCollapsed}
+                setCollapsed={setSidebarCollapsed}
+                mobileOpen={mobileSidebarOpen}
+                setMobileOpen={setMobileSidebarOpen}
+            />
             <div className="relative min-h-screen pb-12">
             <div className="fixed inset-0 z-0 overflow-hidden opacity-10 dark:opacity-30 pointer-events-none">
                 <DotGrid
@@ -120,11 +134,12 @@ function Dashboard() {
                     returnDuration={1.5}
                 />
             </div>
-            <div className="relative z-10 w-[80vw] max-w-5xl mx-auto px-6 py-12">
+            <div className={`relative z-10 transition-all duration-300 ${sidebarCollapsed ? 'md:pl-28' : 'md:pl-96'}`}>
+            <div className="w-[90vw] max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-12">
                 {user && (
                     <SplitText
                         text={`Hello       ${user.name}!`}
-                        className="w-full mb-5 text-5xl md:text-6xl dark:text-white text-gray-900 font-semibold text-center block"
+                        className="w-full mb-3 text-4xl md:text-6xl dark:text-white text-gray-900 font-semibold text-center block"
                         delay={20}
                         duration={1.1}
                         ease="power3.out"
@@ -138,7 +153,30 @@ function Dashboard() {
                         showCallback
                     />
                 )}
-                <div className="bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-sm transition-colors duration-300 rounded-2xl shadow-xl shadow-black/5 p-8">
+
+                <section className="mb-8 md:mb-10 rounded-3xl border border-emerald-200/70 dark:border-emerald-900/60 bg-linear-to-br from-emerald-100 via-lime-50 to-white dark:from-[#173129] dark:via-[#13241e] dark:to-[#1C1C1E] shadow-xl shadow-emerald-900/10 p-6 md:p-8">
+                    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5">
+                        <div>
+                            <p className="text-sm md:text-base uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300 font-semibold mb-2">
+                                Daily Focus
+                            </p>
+                            <h2 className="text-2xl md:text-4xl font-extrabold text-[#1c2c23] dark:text-[#ddf5e6] leading-tight">
+                                Track meals faster and scroll down for your highlighted nutrition tip.
+                            </h2>
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                            <SpectacularButton
+                                type="button"
+                                onClick={scrollToNutritionTip}
+                                className="bg-[#0f766e] text-white text-base font-semibold px-6 py-3 rounded-xl hover:bg-[#0b5e58]"
+                            >
+                                Jump to Nutrition Tip
+                            </SpectacularButton>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="log-meal" className="bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-sm transition-colors duration-300 rounded-2xl shadow-xl shadow-black/5 p-6 md:p-8">
                     <h1 className="text-3xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] mb-8">
                         Log a Meal
                     </h1>
@@ -191,9 +229,9 @@ function Dashboard() {
                             </p>
                         </div>
                     )}
-                </div>
+                </section>
                 {/* --- Glucose reading + chart, side by side --- */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+                <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
 
                     {/* Reading form */}
                     <div className="bg-white mb-8 dark:bg-[#1C1C1E] rounded-2xl shadow-xl shadow-black/5 p-9">
@@ -279,10 +317,11 @@ function Dashboard() {
                             </p>
                         )}
                     </div>
-                </div>
+                </section>
+            <section id="nutrition-tip" className="mt-16 md:mt-22 scroll-mt-20">
+                <TipCard emphasize />
+            </section>
             </div>
-            <div className="max-w-7xl place-self-center mt-20 px-6">
-                <TipCard/>
             </div>
             </div>
         </div>
