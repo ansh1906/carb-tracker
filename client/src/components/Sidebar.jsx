@@ -52,6 +52,7 @@ function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) {
       { label: 'Home', path: '/dashboard', icon: HomeIcon },
       { label: 'News', path: '/insights/news', icon: NewsIcon },
       { label: 'Insights', path: '/insights/latest-research', icon: InsightsIcon },
+      { label: 'Insulin dos and donts', path: '/insulin-dos-and-donts', icon: InsulinIcon },
     ],
     []
   );
@@ -202,6 +203,18 @@ function InsightsIcon() {
       <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8">
         <path d="M4.5 19h15" />
         <path d="M7.5 16V9m4.5 7V5m4.5 11v-4" />
+      </svg>
+    </IconWrap>
+  );
+}
+
+function InsulinIcon() {
+  return (
+    <IconWrap>
+      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="1.8">
+        <path d="M9 3v5.5M15 3v5.5M7 5h10M7 8.5h10" />
+        <path d="M8 8.5h8v4.25A4 4 0 0 1 12 16.75a4 4 0 0 1-4-4V8.5Z" />
+        <path d="M12 16.75V21M9.5 21h5" />
       </svg>
     </IconWrap>
   );

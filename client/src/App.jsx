@@ -6,6 +6,7 @@ import VerifyOTP from './pages/VerifyOTP';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './services/protectedRoute';
 import Profile from './pages/Profile';
+import InsulinDosAndDonts from './pages/InsulinDosAndDonts';
 
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/insulin-dos-and-donts" element={<ProtectedRoute><InsulinDosAndDonts /></ProtectedRoute>} />
       </Routes>
     </Router>
   )

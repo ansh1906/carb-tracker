@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { createMeal } from '../services/mealService';
 import { getMe, updateProfile } from '../services/authService';
-import Navbar from '../components/navbar';
 import AnalyzingLoader from '../components/AnalyzingLoader';
 import DotGrid from '../components/test';
 import SpectacularButton from '../components/SpectacularButton';
@@ -9,6 +8,7 @@ import { createReading, getTimeInRange } from '../services/glucoseService';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import SplitText from '../components/SplitText';
 import TipCard from '../components/TipCard';
+import Navbar from '../components/navbar';
 import Sidebar from '../components/Sidebar';
 
 function Dashboard() {
@@ -99,6 +99,7 @@ function Dashboard() {
               { name: 'Above Range', value: tirData.aboveRangePercent },
           ]
         : [];
+    const hasChartData = chartData.some((entry) => Number(entry.value) > 0);
 
     const COLORS = ['#F59E0B', '#0D9488', '#DC2626'];
 
@@ -112,7 +113,7 @@ function Dashboard() {
     };
 
     return ( 
-        <div className="relative min-h-screen bg-[#FAFAF9] dark:bg-[#121212]">
+        <div className="relative min-h-screen bg-[#FAFAF9] dark:bg-[#121212] pt-18">
             <Navbar onSidebarToggle={() => setMobileSidebarOpen(true)} />
             <Sidebar
                 collapsed={sidebarCollapsed}
@@ -168,7 +169,7 @@ function Dashboard() {
                             <SpectacularButton
                                 type="button"
                                 onClick={scrollToNutritionTip}
-                                className="bg-[#0f766e] text-white text-base font-semibold px-6 py-3 rounded-xl hover:bg-[#0b5e58]"
+                                className="bg-[#0f766e] text-black dark:text-white text-base font-semibold px-6 py-3 rounded-xl hover:bg-[#0b5e58]"
                             >
                                 Jump to Nutrition Tip
                             </SpectacularButton>
@@ -281,40 +282,52 @@ function Dashboard() {
                         )}
                     </div>
 
-                    {/* Chart — bigger, no card wrapper */}
-                    <div className="flex flex-col items-center justify-center py-6">
-                        <h2 className="text-2xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7] mb-1 -mt-5 self-start">
-                            Time in Range
-                        </h2>
-                        <p className="text-sm text-[#6E6E73] dark:text-[#9B9BA1] -mb-15 mr-0.5 self-start">
-                            Last 7 days
-                        </p>
-                        {tirData ? (
-                            <ResponsiveContainer width="100%" height={380}>
+                    <div className="rounded-3xl border border-blue-100 bg-linear-to-br from-blue-50 via-white to-emerald-50 p-5 shadow-lg shadow-blue-900/5 dark:border-blue-950/70 dark:from-[#172338] dark:via-[#1C1C1E] dark:to-[#172b25] md:p-7">
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">Your weekly snapshot</p>
+                                <h2 className="mt-1 text-3xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7]">Time in Range</h2>
+                                <p className="mt-1 text-base text-[#6E6E73] dark:text-[#9B9BA1]">Last 7 days</p>
+                            </div>
+                            <span className="rounded-full bg-white/80 px-3 py-1 text-sm font-medium text-[#6E6E73] dark:bg-white/10 dark:text-[#B8B8C0]">Glucose</span>
+                        </div>
+                        {hasChartData ? (
+                            <ResponsiveContainer width="100%" height={390}>
                                 <PieChart>
                                     <Pie
                                         data={chartData}
                                         dataKey="value"
                                         nameKey="name"
-                                        cx="55%"
-                                        cy="50%"
-                                        outerRadius={130}
-                                        innerRadius={50}
-                                        paddingAngle={0}
-                                        label={({ value }) => (value > 0 ? `${value.toFixed(0)}%` : '')}
+                                        cx="50%"
+                                        cy="47%"
+                                        outerRadius={132}
+                                        innerRadius={82}
+                                        paddingAngle={3}
+                                        cornerRadius={8}
+                                        startAngle={90}
+                                        endAngle={-270}
+                                        label={({ value }) => (value > 0 ? `${Number(value).toFixed(0)}%` : '')}
+                                        labelLine={false}
                                     >
                                         {chartData.map((entry, index) => (
-                                            <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                                            <Cell key={entry.name} fill={COLORS[index % COLORS.length]} stroke="none" />
                                         ))}
                                     </Pie>
-                                    <Tooltip />
-                                    <Legend wrapperStyle={{ fontSize: '16px' }} />
+                                    <text x="50%" y="45%" textAnchor="middle" dominantBaseline="middle" className="fill-[#1C1C1E] text-3xl font-bold dark:fill-[#F5F5F7]">{Math.round(Number(tirData.inRangePercent))}%</text>
+                                    <text x="50%" y="52%" textAnchor="middle" dominantBaseline="middle" className="fill-[#6E6E73] text-sm dark:fill-[#B8B8C0]">in range</text>
+                                    <Tooltip contentStyle={{ borderRadius: '14px', border: '1px solid #dbeafe', boxShadow: '0 8px 24px rgba(15, 23, 42, 0.12)' }} formatter={(value) => [`${Number(value).toFixed(0)}%`, 'Share']} />
+                                    <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ fontSize: '16px', paddingTop: '16px' }} />
                                 </PieChart>
                             </ResponsiveContainer>
                         ) : (
-                            <p className="text-base text-[#6E6E73] dark:text-[#9B9BA1] py-16">
-                                No readings yet — log one to see your trend.
-                            </p>
+                            <div className="my-6 flex min-h-80 flex-col items-center justify-center rounded-2xl border border-dashed border-blue-200 bg-white/60 px-6 text-center dark:border-blue-900/70 dark:bg-white/5">
+                                <div className="relative mb-5 flex h-36 w-36 items-center justify-center rounded-full border-18 border-blue-100 dark:border-blue-950">
+                                    <div className="absolute inset-3 rounded-full border border-dashed border-emerald-300 dark:border-emerald-800" />
+                                    <span className="text-4xl text-blue-500 dark:text-blue-300">+</span>
+                                </div>
+                                <h3 className="text-xl font-semibold text-[#1C1C1E] dark:text-[#F5F5F7]">Your chart is ready</h3>
+                                <p className="mt-2 max-w-xs text-base leading-6 text-[#6E6E73] dark:text-[#B8B8C0]">Log your first glucose reading to see how much time you spend below, in, and above range.</p>
+                            </div>
                         )}
                     </div>
                 </section>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import DotGrid from '../components/test';
 import { getMe, updateProfile } from '../services/authService';
 import Navbar from '../components/navbar';
+import Sidebar from '../components/Sidebar';
 
 function Profile() {
     const [user,setUser] = useState(null);
@@ -11,6 +12,8 @@ function Profile() {
     const [success, setSuccess] = useState('');
     const [targetLow, setTargetLow] = useState(70);
     const [targetHigh, setTargetHigh] = useState(180);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
     useEffect(()=>{
         const fetchUser = async ()=> {
@@ -58,7 +61,14 @@ function Profile() {
     };
 
     return (
-        <div className="relative min-h-screen bg-[#FAFAF9] dark:bg-[#121212] overflow-hidden">
+        <div className="relative min-h-screen bg-[#FAFAF9] dark:bg-[#121212] overflow-hidden pt-18">
+            <Navbar onSidebarToggle={() => setMobileSidebarOpen(true)} />
+            <Sidebar
+                collapsed={sidebarCollapsed}
+                setCollapsed={setSidebarCollapsed}
+                mobileOpen={mobileSidebarOpen}
+                setMobileOpen={setMobileSidebarOpen}
+            />
             <div className="mt-17 absolute inset-0 z-0 overflow-hidden opacity-20">
                 <DotGrid
                         dotSize={5}
@@ -73,9 +83,9 @@ function Profile() {
                     />
             </div>
             <Navbar />
-
-            <div className="w-full max-w-175 mx-auto relative z-10 px-6 py-12">
-                <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-xl shadow-black/5 p-8">
+            <div className={`relative z-10 min-h-screen px-4 py-10 transition-all duration-300 md:py-14 ${sidebarCollapsed ? 'md:pl-28' : 'md:pl-96'}`}>
+            <div className="w-full max-w-175 mx-auto relative z-10 px-6 py-12 ">
+                <div className="bg-white dark:bg-[#1C1C1E] rounded-2xl shadow-xl shadow-black/5 p-8 ">
                     {error && error !== 'Low target cannot be higher than high target' && (
                         <p className="text-sm text-red-500 text-center">{error}</p>
                     )}
@@ -184,6 +194,7 @@ function Profile() {
                         </div>
                     )}
                 </div>
+            </div>
             </div>
         </div>
     );

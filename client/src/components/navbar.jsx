@@ -12,7 +12,7 @@ function Navbar({ onSidebarToggle }) {
   };
 
   return (
-    <nav className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-6 py-4 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800 transition-colors duration-300">
+    <nav className="fixed inset-x-0 top-0 z-30 flex items-center justify-between px-4 md:px-6 py-4 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800 transition-colors duration-300">
       <div className="flex items-center gap-3 md:gap-6">
         {onSidebarToggle && (
           <button
